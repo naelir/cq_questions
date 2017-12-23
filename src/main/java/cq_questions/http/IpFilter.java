@@ -1,9 +1,14 @@
-package cq_questions;
+package cq_questions.http;
 
 import java.io.IOException;
 import java.util.Set;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -16,9 +21,9 @@ public class IpFilter implements Filter {
 
 	private final Set<String> allowedIps;
 
-	public IpFilter(final Set<String> bannedIps, final Set<String> allowedIps) {
-		this.bannedIps = bannedIps;
-		this.allowedIps = allowedIps;
+	public IpFilter(Builder builder) {
+		this.bannedIps = builder.bannedIps;
+		this.allowedIps = builder.allowedIps;
 	}
 
 	@Override
@@ -35,7 +40,7 @@ public class IpFilter implements Filter {
 					&& !this.bannedIps.contains(ip);
 			if (isIPAllowed == false) {
 				httpservletResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
-				LOG.info("filter banned ip : " + ip);
+				LOG.info("banned ip {} filtered : ", ip);
 			} else
 				filterChain.doFilter(servletRequest, servletResponse);
 		}
@@ -43,5 +48,25 @@ public class IpFilter implements Filter {
 
 	@Override
 	public void init(final FilterConfig filterConfig) throws ServletException {
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static final class Builder {
+		private Set<String> bannedIps;
+
+		private Set<String> allowedIps;
+
+		public Builder setBannedIps(Set<String> bannedIps) {
+			this.bannedIps = bannedIps;
+			return this;
+		}
+
+		public Builder setAllowedIps(Set<String> allowedIps) {
+			this.allowedIps = allowedIps;
+			return this;
+		}
 	}
 }

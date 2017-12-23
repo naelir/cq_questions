@@ -1,4 +1,4 @@
-package cq_questions;
+package cq_questions.http;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -7,6 +7,10 @@ import java.util.List;
 import com.google.common.collect.LinkedListMultimap;
 
 public class IpTimeWindowManager {
+	private static final int MAX_REQUEST_PER_IP_IN_WINDOW = 2;
+
+	private static final int WINDOW_SIZE_IN_MINUTES = 300;
+
 	private long lastEpochMinute;
 
 	private final LinkedListMultimap<String, Long> requestsPerIp;
@@ -27,7 +31,7 @@ public class IpTimeWindowManager {
 	}
 
 	private void cleanExpiredRequests() {
-		final long expiredEpochMinute = this.lastEpochMinute - (IpLimitFilter.WINDOW_SIZE_IN_MINUTES * 60);
+		final long expiredEpochMinute = this.lastEpochMinute - (WINDOW_SIZE_IN_MINUTES * 60);
 		for (final String ipAddress : this.requestsPerIp.keySet()) {
 			final List<Long> requests = this.requestsPerIp.get(ipAddress);
 			for (final Long request : requests)
@@ -40,6 +44,7 @@ public class IpTimeWindowManager {
 
 	public synchronized boolean ipAddressReachedLimit(final String ipAddress) {
 		final int amountRequests = this.requestsPerIp.get(ipAddress).size();
-		return (amountRequests > IpLimitFilter.MAX_REQUEST_PER_IP_IN_WINDOW);
+		final boolean value = amountRequests > MAX_REQUEST_PER_IP_IN_WINDOW;
+		return value;
 	}
 }
