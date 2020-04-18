@@ -16,7 +16,6 @@ import cq_questions.factory.IQuestionFactory;
 import cq_questions.model.Selectable;
 import cq_questions.model.Tipable;
 import cq_questions.validator.IValidator;
-import cq_questions.validator.TimeHashValidator;
 import cq_questions.validator.UserAgentValidator;
 import cq_questions.validator.UserHashValidator;
 
@@ -28,13 +27,7 @@ public class Controller {
 
 	private static final Integer MAX_QUESTIONS = 2000;
 
-	private static final String TIME_MD5_HASH_HEADER = "time_md5_hash";
-
 	private static final String USER_NAME_MD5_HASH_HEADER = "user_name_md5_hash";
-
-	private static final int REQUEST_IS_VALID_LAST_N_SECONDS = 60;
-
-	private static final IValidator<String> TIME_HASH_VALIDATOR = new TimeHashValidator(REQUEST_IS_VALID_LAST_N_SECONDS);
 
 	private static final String REQUIRED_USER_AGENT = "unirest-java/1.3.11";
 
@@ -55,11 +48,9 @@ public class Controller {
 	@RequestMapping(produces = "application/json", method = RequestMethod.GET, value = "questions")
 	public Set<Selectable> getSelectables(
 			@RequestHeader(value = USER_NAME_MD5_HASH_HEADER, defaultValue = "") final String userNameHash,
-			@RequestHeader(value = TIME_MD5_HASH_HEADER, defaultValue = "") final String timeHash,
 			@RequestHeader(value = "User-Agent", defaultValue = "") final String userAgent) {
 		final boolean isRequestValid =
 				USER_HASH_VALIDATOR.isValid(userNameHash) &&
-				TIME_HASH_VALIDATOR.isValid(timeHash) &&
 				USER_AGENT_VALIDATOR.isValid(userAgent);
 		LOG.debug("request is acceptable: {}", isRequestValid);
 		if (isRequestValid) {
@@ -75,11 +66,9 @@ public class Controller {
 	@RequestMapping(produces = "application/json", method = RequestMethod.GET, value = "tips")
 	public Set<Tipable> getTipables(
 			@RequestHeader(value = USER_NAME_MD5_HASH_HEADER, defaultValue = "") final String userNameHash,
-			@RequestHeader(value = TIME_MD5_HASH_HEADER, defaultValue = "") final String timeHash,
 			@RequestHeader(value = "User-Agent", defaultValue = "") final String userAgent) {
 		final boolean isRequestValid =
 				USER_HASH_VALIDATOR.isValid(userNameHash) &&
-				TIME_HASH_VALIDATOR.isValid(timeHash) &&
 				USER_AGENT_VALIDATOR.isValid(userAgent);
 		LOG.debug("request is acceptable: {}", isRequestValid);
 		if (isRequestValid) {
